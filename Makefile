@@ -32,26 +32,26 @@ endif
 
 # Fontes
 FONTES = main.c
-OBJ = $(FONTES:.c=.o)
+OUTDIR = output
 
 # Target (com extensao se necessario)
-TARGET = $(PROG)$(EXEEXT)
+TARGET = $(OUTDIR)/$(PROG)$(EXEEXT)
 
 # Regras
-all: $(TARGET)
+all: $(OUTDIR) $(TARGET)
 	@echo "Build completado para $(OSNAME). Saida: $(TARGET)"
 
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $@ $(LDFLAGS) $(LIBS)
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(TARGET): $(FONTES) | $(OUTDIR)
+	$(CC) $(CFLAGS) $(FONTES) -o $@ $(LDFLAGS) $(LIBS)
 
 clean:
 ifeq ($(OS),Windows_NT)
 	del /Q $(subst /,\,$(OBJ)) $(TARGET) 2>nul || true
 else
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(OUTDIR)
 endif
 
 # Mostra infos do SO detectado

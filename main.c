@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     if (argc < 5)
     {
         printf("Uso: hdrvis <imagem.hdf> <stop> <gamma> tonemap: 1=Reinhard 2=ACES>\n");
-        printf("Exemplo: hdrvis images/cathedral.hdf 0 2.2 1\n");
+        printf("Exemplo: ./output/hdrvis images/cathedral.hdf 0 2.2 1\n");
         exit(1);
     }
 
@@ -106,9 +106,19 @@ int main(int argc, char *argv[])
     clock_t fim = clock();
     printf("Tempo: %.3f s\n", (double)(fim - inicio) / CLOCKS_PER_SEC);
 
+    char *nome = strrchr(argv[1], '/');
+    nome = nome ? nome + 1 : argv[1];
+    char *ext = strrchr(nome, '.');
+
+    if (ext)
+        *ext = '\0';
+
+    char out[1024];
+    snprintf(out, sizeof(out), "output/%s_saida.jpg", nome);
+
     // Grava a imagem de saída como JPEG para conferência (usando a função stbi_write_jpg, com qualidade 90)
-    stbi_write_jpg("saida.jpg", saida.width, saida.height, 3, saida.pixels, 90);
-    printf("Saida gravada em saida.jpg\n");
+    stbi_write_jpg(out, saida.width, saida.height, 3, saida.pixels, 90);
+    printf("Saida gravada em %s\n", out);
 
     free(entrada.pixels);
     free(saida.pixels);
