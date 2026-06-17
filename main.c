@@ -226,7 +226,8 @@ void tonemapReinhard(ImgRGBF *img)
     float Lwhite = 0.0f; // encontra a maior luminancia
     for (int i = 0; i < tam; i++)
     {
-        float L = 0.2126f * img->pixels[i].r + 0.7152f * img->pixels[i].g + 0.0722f * img->pixels[i].b;
+        RGBFPixel *p = &img->pixels[i];
+        float L = 0.2126f * p->r + 0.7152f * p->g + 0.0722f * p->b;
         if (L > Lwhite)
         {
             Lwhite = L;
@@ -238,38 +239,20 @@ void tonemapReinhard(ImgRGBF *img)
     {
         RGBFPixel *p = &img->pixels[i];
 
-        // Reinhard modificado com ponto de branco
-        p->r = (p->r * (1.0f + p->r / Lw2)) / (1.0f + p->r);
-        p->g = (p->g * (1.0f + p->g / Lw2)) / (1.0f + p->g);
-        p->b = (p->b * (1.0f + p->b / Lw2)) / (1.0f + p->b);
+        float L = 0.2126f * p->r + 0.7152f * p->g + 0.0722f * p->b;
+        float Ld = (L * (1.0f + L / Lw2)) / (1.0f + L);
+        float scale = Ld / L;
 
-        // Clamp 0..1
-        if (p->r > 1.0f)
-        {
-            p->r = 1.0f;
-        }
-        if (p->r < 0.0f)
-        {
-            p->r = 0.0f;
-        }
+        p->r *= scale;
+        p->g *= scale;
+        p->b *= scale;
 
-        if (p->g > 1.0f)
-        {
-            p->g = 1.0f;
-        }
-        if (p->g < 0.0f)
-        {
-            p->g = 0.0f;
-        }
-
-        if (p->b > 1.0f)
-        {
-            p->b = 1.0f;
-        }
-        if (p->b < 0.0f)
-        {
-            p->b = 0.0f;
-        }
+        if (p->r > 1.0f) p->r = 1.0f;
+        if (p->r < 0.0f) p->r = 0.0f;
+        if (p->g > 1.0f) p->g = 1.0f;
+        if (p->g < 0.0f) p->g = 0.0f;
+        if (p->b > 1.0f) p->b = 1.0f;
+        if (p->b < 0.0f) p->b = 0.0f;
     }
 }
 
