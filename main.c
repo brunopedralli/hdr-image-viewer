@@ -68,6 +68,17 @@ int main(int argc, char *argv[])
     float gamma = atof(argv[3]);
     int tonemapAlgo = atoi(argv[4]);
 
+    if (gamma <= 0.0f)
+    {
+        fprintf(stderr, "Erro: gamma deve ser > 0 (recebido: %.3f)\n", gamma);
+        exit(1);
+    }
+    if (tonemapAlgo != 1 && tonemapAlgo != 2)
+    {
+        fprintf(stderr, "Erro: tonemap deve ser 1 (Reinhard) ou 2 (ACES) (recebido: %d)\n", tonemapAlgo);
+        exit(1);
+    }
+
     // Imagens de entrada e saída
     ImgRGBF entrada;
     ImgRGB saida;
