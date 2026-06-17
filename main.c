@@ -106,6 +106,11 @@ int main(int argc, char *argv[])
     saida.width = entrada.width;
     saida.height = entrada.height;
     saida.pixels = malloc(tam * sizeof(RGBPixel));
+    if (!saida.pixels)
+    {
+        fprintf(stderr, "Erro: falha ao alocar imagem de saida (%d pixels)\n", tam);
+        exit(1);
+    }
     memset(saida.pixels, 0, tam * sizeof(RGBPixel));
 
     printf("Stop : %.1f Gamma: %.1f ToneMap: %s\n", stop, gamma, tonemapAlgo == 1 ? "Reinhard" : "ACES");
@@ -141,17 +146,25 @@ int main(int argc, char *argv[])
 void carregaHeader(FILE *fp, ImgRGBF *img)
 {
     char magic[4] = {0};
-    fread(magic, 1, 3, fp);
+    if (fread(magic, 1, 3, fp) != 3)
+    {
+        fprintf(stderr, "Erro: arquivo truncado ao ler magic number\n");
+        exit(1);
+    }
 
     if (strncmp(magic, "HDF", 3) != 0)
     {
         fprintf(stderr, "Erro: arquivo nao e HDF valido (magic='%s')\n", magic);
-        exit(0);
+        exit(1);
     }
 
     unsigned int w, h;
-    fread(&w, sizeof(unsigned int), 1, fp);
-    fread(&h, sizeof(unsigned int), 1, fp);
+    if (fread(&w, sizeof(unsigned int), 1, fp) != 1 ||
+        fread(&h, sizeof(unsigned int), 1, fp) != 1)
+    {
+        fprintf(stderr, "Erro: arquivo truncado ao ler dimensoes\n");
+        exit(1);
+    }
 
     img->width = (int)w;
     img->height = (int)h;
@@ -166,11 +179,20 @@ void carregaImagem(FILE *fp, ImgRGBF *img)
 {
     int tam = img->width * img->height;
     img->pixels = malloc(tam * sizeof(RGBFPixel));
+    if (!img->pixels)
+    {
+        fprintf(stderr, "Erro: falha ao alocar imagem de entrada (%d pixels)\n", tam);
+        exit(1);
+    }
 
     for (int i = 0; i < tam; i++)
     {
         RGBEPixel rgbe;
-        fread(&rgbe, sizeof(RGBEPixel), 1, fp);
+        if (fread(&rgbe, sizeof(RGBEPixel), 1, fp) != 1)
+        {
+            fprintf(stderr, "Erro: arquivo truncado no pixel %d de %d\n", i, tam);
+            exit(1);
+        }
 
         // Fator de conversão: f = 2^(e - 128) / 255
         float f = ldexp(1.0f, (int)rgbe.e - 128) / 255.0f;
