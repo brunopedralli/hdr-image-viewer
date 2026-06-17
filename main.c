@@ -274,32 +274,12 @@ void tonemapACES(ImgRGBF *img)
         p->g = (g * (2.51f * g + 0.03f)) / (g * (2.43f * g + 0.59f) + 0.14f);
         p->b = (b * (2.51f * b + 0.03f)) / (b * (2.43f * b + 0.59f) + 0.14f);
 
-        if (p->r > 1.0f)
-        {
-            p->r = 1.0f;
-        }
-        if (p->r < 0.0f)
-        {
-            p->r = 0.0f;
-        }
-
-        if (p->g > 1.0f)
-        {
-            p->g = 1.0f;
-        }
-        if (p->g < 0.0f)
-        {
-            p->g = 0.0f;
-        }
-
-        if (p->b > 1.0f)
-        {
-            p->b = 1.0f;
-        }
-        if (p->b < 0.0f)
-        {
-            p->b = 0.0f;
-        }
+        if (p->r > 1.0f) p->r = 1.0f;
+        if (p->r < 0.0f) p->r = 0.0f;
+        if (p->g > 1.0f) p->g = 1.0f;
+        if (p->g < 0.0f) p->g = 0.0f;
+        if (p->b > 1.0f) p->b = 1.0f;
+        if (p->b < 0.0f) p->b = 0.0f;
     }
 }
 
@@ -308,26 +288,22 @@ void process(ImgRGBF *in, ImgRGB *out, float stop, float gamma, int tonemapAlgo)
 {
     int tam = in->width * in->height;
 
-    // Ponteiros de função para exposição e gama
     FuncPixel fnExposicao = aplicaExposicao;
     FuncPixel fnGama = aplicaGama;
 
-    // Passo 2: aplicar exposição pixel a pixel
     for (int i = 0; i < tam; i++)
     {
         fnExposicao(&in->pixels[i], stop);
     }
 
-    // Passo 3: tone mapping (escolha via ponteiro de função para ImgRGBF)
     void (*fnToneMap)(ImgRGBF *) = (tonemapAlgo == 2) ? tonemapACES : tonemapReinhard;
     fnToneMap(in);
 
-    // Passo 4: correção gama pixel a pixel
     for (int i = 0; i < tam; i++)
     {
         fnGama(&in->pixels[i], gamma);
     }
-    // Passo 5: converter float → RGB 24 bits
+
     for (int i = 0; i < tam; i++)
     {
         out->pixels[i].r = (unsigned char)(in->pixels[i].r * 255.0f);
