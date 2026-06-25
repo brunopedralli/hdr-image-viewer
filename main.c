@@ -113,7 +113,9 @@ int main(int argc, char *argv[])
     }
     memset(saida.pixels, 0, tam * sizeof(RGBPixel));
 
-    printf("Stop : %.1f Gamma: %.1f ToneMap: %s\n", stop, gamma, tonemapAlgo == 1 ? "Reinhard" : "ACES");
+    char *algo = (tonemapAlgo == 1) ? "Reinhard" : "ACES";
+
+    printf("Stop : %.1f Gamma: %.1f ToneMap: %s\n", stop, gamma, algo);
     printf("Processando...\n");
     // Aplica todo o processamento necessário (exposição, etc) na função process
     // (acrescente mais parâmetros conforme a necessidade)
@@ -130,7 +132,7 @@ int main(int argc, char *argv[])
         *ext = '\0';
 
     char out[1024];
-    snprintf(out, sizeof(out), "output/%s_saida.jpg", nome);
+    snprintf(out, sizeof(out), "output/%s_%s.jpg", nome, algo);
 
     // Grava a imagem de saída como JPEG para conferência (usando a função stbi_write_jpg, com qualidade 90)
     stbi_write_jpg(out, saida.width, saida.height, 3, saida.pixels, 90);
